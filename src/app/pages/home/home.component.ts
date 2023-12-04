@@ -19,6 +19,10 @@ export class HomeComponent implements OnInit {
   options: any;
 
   ngOnInit() {
+    if (!navigator.onLine) {
+      this.router.navigate(['/error']);
+      return;
+    }
     this.olympicService.loadInitialData().subscribe(() => {
       this.olympicService.getOlympics().subscribe((olympics) => {
         this.olympics = olympics;
@@ -38,7 +42,12 @@ export class HomeComponent implements OnInit {
       labels: this.olympics.map((olympic) => olympic.country),
       datasets: [
         {
-          data: this.olympics.map((olympic) => olympic.participations.reduce((total, p) => total + p.medalsCount, 0)),
+          data: this.olympics.map((olympic) =>
+            olympic.participations.reduce(
+              (total, p) => total + p.medalsCount,
+              0
+            )
+          ),
           backgroundColor: [
             documentStyle.getPropertyValue('--pink-900'),
             documentStyle.getPropertyValue('--blue-300'),

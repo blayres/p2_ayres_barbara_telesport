@@ -26,16 +26,29 @@ export class DetailsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (!navigator.onLine) {
+      this.router.navigate(['/error']);
+      return;
+    }
     this.route.params.subscribe((params) => {
       const country = params['country'];
-      this.olympic = this.olympicService.getOlympicByCountry(country);
-  
-       if (this.olympic) {
-        this.countryName = this.olympic.country;
-        this.numberOfEntries = this.olympic.participations.length;
-        this.totalNumberMedals = this.calculateTotalMedals();
-        this.totalNumberAthletes = this.calculateTotalAthletes();
+
+      if (!country) {
+        this.router.navigate(['/error']);
+        return;
       }
+
+      this.olympic = this.olympicService.getOlympicByCountry(country);
+
+      if (!this.olympic) {
+        this.router.navigate(['/error']);
+        return;
+      }
+
+      this.countryName = this.olympic.country;
+      this.numberOfEntries = this.olympic.participations.length;
+      this.totalNumberMedals = this.calculateTotalMedals();
+      this.totalNumberAthletes = this.calculateTotalAthletes();
 
       this.updateChartData();
     });
@@ -89,11 +102,21 @@ export class DetailsComponent implements OnInit {
   }
 
   private calculateTotalMedals(): number {
-    return this.olympic?.participations.reduce((total, p) => total + p.medalsCount, 0) || 0;
+    return (
+      this.olympic?.participations.reduce(
+        (total, p) => total + p.medalsCount,
+        0
+      ) || 0
+    );
   }
 
   private calculateTotalAthletes(): number {
-    return this.olympic?.participations.reduce((total, p) => total + p.athleteCount, 0) || 0;
+    return (
+      this.olympic?.participations.reduce(
+        (total, p) => total + p.athleteCount,
+        0
+      ) || 0
+    );
   }
 
   navigateBack() {
