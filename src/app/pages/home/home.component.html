@@ -1,0 +1,14 @@
+<div class="container">
+  <h1 class="main-title">Medals per country</h1>
+  <div class="subtitle-container">
+    <div class="subtitle">
+      <h3>Number of JOs</h3>
+      <p>{{ numberOfJOs }}</p>
+    </div>
+    <div class="subtitle">
+      <h3>Number of countries</h3>
+      <p>{{ numberOfCountries }}</p>
+    </div>
+  </div>
+  <p-chart type="pie" [data]="data" [options]="options"></p-chart>
+</div>
