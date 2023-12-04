@@ -1,110 +1,102 @@
 import { Component, OnInit } from '@angular/core';
 import { OlympicService } from 'src/app/core/services/olympic.service';
 import { Olympic } from 'src/app/core/models/Olympic';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  selector: 'app-details',
+  templateUrl: './details.component.html',
+  styleUrls: ['./details.component.scss'],
 })
-export class HomeComponent implements OnInit {
-  public olympics: Olympic[] = [];
-  public numberOfJOs: number = 0;
-  public numberOfCountries: number = 0;
-
-  constructor(private olympicService: OlympicService, private router: Router) {}
+export class DetailsComponent implements OnInit {
+  public olympic: Olympic | undefined;
 
   data: any;
   options: any;
 
-  ngOnInit() {
-    this.olympicService.loadInitialData().subscribe(() => {
-      this.olympicService.getOlympics().subscribe((olympics) => {
-        this.olympics = olympics;
-        this.updateChartData();
+  countryName: string | undefined;
+  numberOfEntries: number | undefined;
+  totalNumberMedals: number | undefined;
+  totalNumberAthletes: number | undefined;
 
-        this.numberOfJOs = this.calculateTotalJOs();
-        this.numberOfCountries = this.calculateTotalCountries();
-      });
+  constructor(
+    private olympicService: OlympicService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      const country = params['country'];
+      this.olympic = this.olympicService.getOlympicByCountry(country);
+  
+       if (this.olympic) {
+        this.countryName = this.olympic.country;
+        this.numberOfEntries = this.olympic.participations.length;
+        this.totalNumberMedals = this.calculateTotalMedals();
+        this.totalNumberAthletes = this.calculateTotalAthletes();
+      }
+
+      this.updateChartData();
     });
   }
 
   private updateChartData() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    if (this.olympic) {
+      const documentStyle = getComputedStyle(document.documentElement);
+      const textColor = documentStyle.getPropertyValue('--text-color');
 
-    this.data = {
-      labels: this.olympics.map((olympic) => olympic.country),
-      datasets: [
-        {
-          data: this.olympics.map((olympic) => olympic.participations.reduce((total, p) => total + p.medalsCount, 0)),
-          backgroundColor: [
-            documentStyle.getPropertyValue('--pink-900'),
-            documentStyle.getPropertyValue('--blue-300'),
-            documentStyle.getPropertyValue('--indigo-400'),
-            documentStyle.getPropertyValue('--cyan-100'),
-            documentStyle.getPropertyValue('--blue-100'),
-            documentStyle.getPropertyValue('--orange-800'),
-          ],
-          borderColor: [
-            documentStyle.getPropertyValue('--pink-900'),
-            documentStyle.getPropertyValue('--blue-300'),
-            documentStyle.getPropertyValue('--indigo-400'),
-            documentStyle.getPropertyValue('--cyan-100'),
-            documentStyle.getPropertyValue('--blue-100'),
-            documentStyle.getPropertyValue('--orange-800'),
-          ],
-        },
-      ],
-    };
-
-    this.options = {
-      maintainAspectRatio: false,
-      aspectRatio: 0.8,
-      plugins: {
-        legend: {
-          labels: {
-            color: textColor,
+      this.data = {
+        labels: this.olympic.participations.map((participation) =>
+          participation.year.toString()
+        ),
+        datasets: [
+          {
+            label: 'Medals Count',
+            data: this.olympic.participations.map(
+              (participation) => participation.medalsCount
+            ),
+            backgroundColor: [
+              documentStyle.getPropertyValue('--pink-900'),
+              documentStyle.getPropertyValue('--blue-300'),
+              documentStyle.getPropertyValue('--indigo-400'),
+            ],
+            borderColor: [
+              documentStyle.getPropertyValue('--pink-900'),
+              documentStyle.getPropertyValue('--blue-300'),
+              documentStyle.getPropertyValue('--indigo-400'),
+            ],
+            borderWidth: 1,
           },
-          padding: {
-            top: 10,
+        ],
+      };
+
+      this.options = {
+        maintainAspectRatio: false,
+        aspectRatio: 1.5,
+        plugins: {
+          legend: {
+            labels: {
+              color: textColor,
+            },
+            padding: {
+              top: 10,
+            },
           },
         },
-      },
-      onClick: (event: any, elements: any) => {
-        if (elements && elements.length > 0) {
-          const clickedIndex = elements[0].index;
-          const country = this.olympics[clickedIndex].country;
-          this.navigateToDetails(country);
-        }
-      },
-    };
+      };
+    }
   }
 
-  private calculateTotalJOs(): number {
-    const uniqueYears = new Set<number>();
-
-    this.olympics.forEach((olympic) => {
-      olympic.participations.forEach((participation) => {
-        uniqueYears.add(participation.year);
-      });
-    });
-
-    return uniqueYears.size;
+  private calculateTotalMedals(): number {
+    return this.olympic?.participations.reduce((total, p) => total + p.medalsCount, 0) || 0;
   }
 
-  private calculateTotalCountries(): number {
-    const uniqueCountries = new Set<string>();
-
-    this.olympics.forEach((olympic) => {
-      uniqueCountries.add(olympic.country);
-    });
-
-    return uniqueCountries.size;
+  private calculateTotalAthletes(): number {
+    return this.olympic?.participations.reduce((total, p) => total + p.athleteCount, 0) || 0;
   }
 
-  private navigateToDetails(country: string) {
-    this.router.navigate(['./details', country]);
+  navigateBack() {
+    this.router.navigate(['./']);
   }
 }

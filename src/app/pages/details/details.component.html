@@ -1,2 +1,22 @@
+<div class="container">
+  <h1 class="main-title">{{ countryName }}</h1>
+  <div class="subtitle-container">
+    <div class="subtitle">
+      <h3>Number of entries</h3>
+      <p>{{ numberOfEntries }}</p>
+    </div>
+    <div class="subtitle">
+      <h3>Total number medals</h3>
+      <p>{{ totalNumberMedals }}</p>
+    </div>
+    <div class="subtitle">
+      <h3>Total number of athletes</h3>
+      <p>{{ totalNumberAthletes }}</p>
+    </div>
+  </div>
+  <p-chart type="bar" [data]="data"></p-chart>
+  <div class="button">
+    <button (click)="navigateBack()">Back to Home</button>
+  </div>
+</div>
 
-<p-chart type="bar" [data]="data" [options]="options"></p-chart>

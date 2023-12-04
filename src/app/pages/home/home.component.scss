@@ -4,6 +4,7 @@
   flex-direction: column;
   max-width: 800px; 
   margin: 0 auto; 
+  padding: 20px;
   font-family: sans-serif;
 
   .main-title {
@@ -46,5 +47,32 @@
     font-weight: 600;
     margin-top: 10px;
     margin-bottom: 0;
+  }
+
+  @media screen and (max-width: 600px) {
+    .main-title {
+      width: 100%;
+      padding: 10px;
+    }
+
+    .subtitle-container {
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .subtitle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      margin-bottom: 10px;
+      padding: 10px;
+    }
+
+    .subtitle p {
+      margin-top: 0;
+    }
   }
 }

@@ -30,4 +30,9 @@ export class OlympicService {
   getOlympics(): Observable<Olympic[]> {
     return this.olympics$.asObservable();
   }
+
+  getOlympicByCountry(country: string): Olympic | undefined {
+    const olympics = this.olympics$.value;
+    return olympics.find((olympic) => olympic.country === country);
+  }
 }
